@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useRef, useState } from 'react'
+import { Note } from 'tonal'
 
 const ENHARMONICS: readonly (readonly string[])[] = [
   ['C', 'B#'],
@@ -27,7 +28,10 @@ interface NoteCellProps {
   cellId: string
   onEdit: (note: string) => void
   onOverride: (note: string) => void
-  onTab?: () => void
+  onTab?: (newNote: string) => void
+  onShiftTab?: (newNote: string) => void
+  onCommit?: () => void
+  onTranspose?: () => void
 }
 
 export function NoteCell({
@@ -39,16 +43,31 @@ export function NoteCell({
   cellId,
   onOverride,
   onTab,
+  onShiftTab,
+  onCommit,
+  onTranspose,
 }: NoteCellProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(note)
   const [menu, setMenu] = useState(false)
   const committed = useRef(false)
+  const preEdit = useRef(note)
 
   function startEdit() {
     committed.current = false
+    preEdit.current = note
     setDraft(note)
     setEditing(true)
+  }
+
+  function normalize(raw: string): string {
+    const trimmed = raw.trim()
+    return Note.get(trimmed).name || trimmed
+  }
+
+  function handleChange(value: string) {
+    setDraft(value)
+    onEdit(normalize(value))
   }
 
   function commit() {
@@ -56,23 +75,28 @@ export function NoteCell({
     committed.current = true
     setEditing(false)
     const value = draft.trim()
-    if (value && value !== note) {
-      onEdit(value)
-    }
-  }
-
-  function cancel() {
-    committed.current = true
-    setEditing(false)
+    if (!value) onEdit(preEdit.current)
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter') commit()
-    if (e.key === 'Escape') cancel()
-    if (e.key === 'Tab') {
+    if (e.key === 'Enter') {
+      commit()
+      onCommit?.()
+    }
+    if (e.key === 'Escape') commit()
+    if (e.key === ' ') {
       e.preventDefault()
       commit()
-      onTab?.()
+      onTranspose?.()
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      const value = normalize(draft)
+      commit()
+      if (value) {
+        if (e.shiftKey) onShiftTab?.(value)
+        else onTab?.(value)
+      }
     }
   }
 
@@ -84,11 +108,14 @@ export function NoteCell({
 
   if (editing) {
     return (
-      <td className="note-cell editing" data-cell={cellId}>
+      <td
+        className={`note-cell editing${conflict ? ' conflict' : ''}`}
+        data-cell={cellId}
+      >
         <input
           autoFocus
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
           onBlur={commit}
           onKeyDown={handleKeyDown}
         />

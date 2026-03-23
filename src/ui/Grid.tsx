@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Note } from 'tonal'
+import { remainingChromas } from '../theory/cells'
 import type { CellId, Matrix, RowLabel } from '../theory/matrix'
 import { validateRow } from '../theory/row'
 import { NoteCell } from './NoteCell'
@@ -14,6 +15,8 @@ interface GridProps {
   draftEdits: Map<number, string>
   onCellEdit: (matrixRow: number, matrixCol: number, note: string) => void
   onOverride: (cell: CellId, note: string) => void
+  onCommit: () => void
+  onTranspose: () => void
   header?: React.ReactNode
   footer?: React.ReactNode
 }
@@ -24,6 +27,8 @@ export function Grid({
   draftEdits,
   onCellEdit,
   onOverride,
+  onCommit,
+  onTranspose,
   header,
   footer,
 }: GridProps) {
@@ -59,29 +64,51 @@ export function Grid({
   }
 
   const tableRef = useRef<HTMLTableElement>(null)
+  const pendingCell = useRef<string | null>(null)
 
-  function tabToConflict(fromRow: number, fromCol: number, chroma: number) {
-    // Find the conflicting cell in the same row
+  useEffect(() => {
+    if (pendingCell.current) {
+      const target = tableRef.current?.querySelector(
+        `[data-cell="${pendingCell.current}"]`,
+      ) as HTMLElement | null
+      pendingCell.current = null
+      target?.click()
+    }
+  })
+
+  function clickCell(row: number, col: number) {
+    const target = tableRef.current?.querySelector(
+      `[data-cell="${row}-${col}"]`,
+    ) as HTMLElement | null
+    target?.click()
+  }
+
+  /** Tab: cycle through cells with the same pitch class, then fall through to next conflict */
+  function tabSameChroma(fromRow: number, fromCol: number, chroma: number) {
     const rowCells = Array.from({ length: 12 }, (_, c) => cell(fromRow, c))
-    for (let c = 0; c < 12; c++) {
-      if (c === fromCol) continue
+    for (let i = 1; i < 12; i++) {
+      const c = (fromCol + i) % 12
       if (Note.get(rowCells[c].note).chroma === chroma) {
-        const target = tableRef.current?.querySelector(
-          `[data-cell="${fromRow}-${c}"]`,
-        ) as HTMLElement | null
-        target?.click()
+        clickCell(fromRow, c)
         return
       }
     }
-    // Fallback: check same column
-    const colCells = Array.from({ length: 12 }, (_, r) => cell(r, fromCol))
-    for (let r = 0; r < 12; r++) {
-      if (r === fromRow) continue
-      if (Note.get(colCells[r].note).chroma === chroma) {
-        const target = tableRef.current?.querySelector(
-          `[data-cell="${r}-${fromCol}"]`,
-        ) as HTMLElement | null
-        target?.click()
+    tabNextChroma(fromRow, fromCol, chroma)
+  }
+
+  /** Shift+Tab: jump to the next conflicting pitch class */
+  function tabNextChroma(fromRow: number, fromCol: number, chroma: number) {
+    const rowCells = Array.from({ length: 12 }, (_, c) => cell(fromRow, c))
+    const chromaCounts = new Map<number, number>()
+    for (const { note } of rowCells) {
+      const ch = Note.get(note).chroma
+      chromaCounts.set(ch, (chromaCounts.get(ch) ?? 0) + 1)
+    }
+    for (let i = 1; i < 12; i++) {
+      const c = (fromCol + i) % 12
+      const ch = Note.get(rowCells[c].note).chroma
+      if (ch !== chroma && (chromaCounts.get(ch) ?? 0) > 1) {
+        clickCell(fromRow, c)
         return
       }
     }
@@ -129,8 +156,9 @@ export function Grid({
             ? `row-label ${rowValid ? 'row-valid' : 'row-invalid'}`
             : 'row-label'
 
-          // Find duplicate chromas within the row
+          // Find duplicate chromas and missing notes within the row
           const rowConflicts = new Set<number>()
+          let missingNotes: string[] = []
           if (rowHasDraft && !rowValid) {
             const chromas = cells.map((c) => Note.get(c.note).chroma)
             const seen = new Set<number>()
@@ -138,11 +166,17 @@ export function Grid({
               if (seen.has(ch)) rowConflicts.add(ch)
               else seen.add(ch)
             }
+            missingNotes = remainingChromas(seen)
           }
 
           return (
             <tr key={r}>
-              <th className={labelClass}>{label}</th>
+              <th className={labelClass}>
+                {label}
+                {missingNotes.length > 0 && (
+                  <div className="missing-notes">{missingNotes.join(' ')}</div>
+                )}
+              </th>
               {cells.map(({ note, isDraft }, c) => {
                 const [mr, mc] = transposed ? [c, r] : [r, c]
                 const chroma = Note.get(note).chroma
@@ -158,12 +192,25 @@ export function Grid({
                     onOverride={(n) =>
                       onOverride({ form, index, position: c }, n)
                     }
-                    onTab={() => tabToConflict(r, c, chroma)}
+                    onTab={(newNote) =>
+                      tabSameChroma(r, c, Note.get(newNote).chroma)
+                    }
+                    onShiftTab={(newNote) =>
+                      tabNextChroma(r, c, Note.get(newNote).chroma)
+                    }
+                    onCommit={onCommit}
+                    onTranspose={() => {
+                      pendingCell.current = `${c}-${r}`
+                      onTranspose()
+                    }}
                   />
                 )
               })}
               <th className={`${labelClass} retro-label`}>
                 {retroLabel(label)}
+                {missingNotes.length > 0 && (
+                  <div className="missing-notes">{missingNotes.join(' ')}</div>
+                )}
               </th>
             </tr>
           )

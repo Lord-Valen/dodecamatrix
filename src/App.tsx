@@ -60,7 +60,12 @@ export default function App() {
   function handleCellEdit(matrixRow: number, matrixCol: number, note: string) {
     setDraftEdits((prev) => {
       const next = new Map(prev)
-      next.set(matrixRow * 12 + matrixCol, note)
+      const key = matrixRow * 12 + matrixCol
+      if (note === matrix.getCell(matrixRow, matrixCol)) {
+        next.delete(key)
+      } else {
+        next.set(key, note)
+      }
       return next
     })
   }
@@ -168,6 +173,8 @@ export default function App() {
           draftEdits={draftEdits}
           onCellEdit={handleCellEdit}
           onOverride={handleOverride}
+          onCommit={handleCommit}
+          onTranspose={() => setTransposed((t) => !t)}
           header={
             <>
               <div className="canonical-row">

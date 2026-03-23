@@ -1,0 +1,60 @@
+<!--
+SPDX-FileCopyrightText: 2026 Lord-Valen
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
+## Quick Reference
+
+### Input
+
+Type 12 notes separated by spaces. Optionally prefix with a label
+like `P0` or `I3`.
+
+Use commas to mark cell boundaries. The first cell defines the
+interval pattern for all cells.
+
+Example: `P0 C E G#, F A C#, Bb D F#, Eb G B`
+
+### Cell Completion
+
+After entering the first note of a new cell, press <kbd>Tab</kbd>
+to complete it using the established pattern.
+
+With 2+ complete cells, add a trailing comma to derive the next
+cell from root motion. Press <kbd>Tab</kbd> to accept.
+
+All valid candidate cells are shown below the input. Click any to
+insert it. <span class="help-viable">Green</span> candidates
+can complete a full 12-tone row.
+
+### Matrix Editing
+
+Click any cell to edit its spelling. Right-click for enharmonic
+alternatives.
+
+Draft edits appear in yellow. Conflicting chromas are outlined in
+red. Missing pitch classes are shown on the row label.
+
+| Key | Action |
+|---|---|
+| <kbd>Enter</kbd> | Confirm edit & commit row (if valid) |
+| <kbd>Escape</kbd> | Exit editing (keeps draft) |
+| <kbd>Tab</kbd> | Confirm & jump to next cell with same pitch class |
+| <kbd>Shift+Tab</kbd> | Confirm & jump to next conflicting pitch class |
+| <kbd>Space</kbd> | Toggle P/I row mode (preserves active cell) |
+
+Tab falls through to the next conflicting pitch class when no
+same-note cells remain.
+
+**Commit** applies a valid edited row as the new source row.
+**Revert** discards all drafts. **Undo** restores the previous source row.
+
+### Settings
+
+**Spelling** controls how notes are named in the matrix:
+*Interval* preserves fifths-based letter names,
+*Pitch Class* normalizes to sharps/flats,
+*Hybrid* mixes both.
+
+**Rows** toggles between P-form rows and I-form rows.
