@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect, useState } from 'react'
+import './App.css'
 import type { CellId, Override, RowLabel, SpellingMode } from './theory/matrix'
 import { Matrix } from './theory/matrix'
 import { validateRow } from './theory/row'
@@ -12,7 +13,6 @@ import { HistoryPanel } from './ui/HistoryPanel'
 import { RowEntry } from './ui/RowEntry'
 import { SpellingToggle } from './ui/SpellingToggle'
 import { TransposeButton } from './ui/TransposeButton'
-import './App.css'
 
 const DEFAULT_ROW = [
   'C',
@@ -169,10 +169,15 @@ export default function App() {
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (document.activeElement?.tagName === 'INPUT') return
       if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
         if (e.shiftKey) handleRedo()
         else handleUndo()
+      }
+      if (e.key === 'Escape' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        handleRevert()
       }
     }
     window.addEventListener('keydown', onKeyDown)
@@ -182,70 +187,58 @@ export default function App() {
   const hasDrafts = draftEdits.size > 0
 
   return (
-    <>
-      <div className="app">
-        <div className="matrix-container">
-          <Grid
-            matrix={matrix}
-            transposed={transposed}
-            draftEdits={draftEdits}
-            onCellEdit={handleCellEdit}
-            onOverride={handleOverride}
-            onCommit={handleCommit}
-            onTranspose={() => setTransposed((t) => !t)}
-            header={
-              <>
-                <div className="canonical-row">
-                  <span className="canonical-label">Source row: </span>
-                  {label} {row.join(' ')}
-                </div>
-                <RowEntry onSubmit={handleRowEntry} />
-              </>
-            }
-            footer={
-              <div className="toolbar">
-                <SpellingToggle
-                  mode={spellingMode}
-                  onChange={handleSpellingChange}
-                />
-                <TransposeButton
-                  transposed={transposed}
-                  onChange={setTransposed}
-                />
-                {hasDrafts && (
-                  <>
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={handleCommit}
-                    >
-                      Commit
-                    </button>
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={handleRevert}
-                    >
-                      Revert
-                    </button>
-                  </>
-                )}
-                {cursor > 0 && (
-                  <button type="button" className="btn" onClick={handleUndo}>
-                    Undo
-                  </button>
-                )}
-                {cursor < history.length - 1 && (
-                  <button type="button" className="btn" onClick={handleRedo}>
-                    Redo
-                  </button>
-                )}
-              </div>
-            }
-          />
+    <div className="app">
+      <div className="input-area">
+        <div className="canonical-row">
+          <span className="canonical-label">Source row: </span>
+          {label} {row.join(' ')}
         </div>
-        <HistoryPanel history={history} cursor={cursor} onJump={handleJump} />
-        <HelpPanel />
+        <RowEntry onSubmit={handleRowEntry} />
+      </div>
+      <div className="matrix-container">
+        <Grid
+          matrix={matrix}
+          transposed={transposed}
+          draftEdits={draftEdits}
+          onCellEdit={handleCellEdit}
+          onOverride={handleOverride}
+          onCommit={handleCommit}
+          onTranspose={() => setTransposed((t) => !t)}
+          header={
+            <div className="action-bar">
+              <button
+                type="button"
+                className="btn btn-icon"
+                disabled={!hasDrafts}
+                onClick={handleCommit}
+                title="Commit row (Enter)"
+              >
+                &#x2713;
+              </button>
+              <button
+                type="button"
+                className="btn btn-icon"
+                disabled={!hasDrafts}
+                onClick={handleRevert}
+                title="Revert drafts (Escape)"
+              >
+                &#x2717;
+              </button>
+            </div>
+          }
+          footer={
+            <div className="toolbar">
+              <SpellingToggle
+                mode={spellingMode}
+                onChange={handleSpellingChange}
+              />
+              <TransposeButton
+                transposed={transposed}
+                onChange={setTransposed}
+              />
+            </div>
+          }
+        />
       </div>
       <footer className="page-footer">
         <a
@@ -267,6 +260,8 @@ export default function App() {
           </svg>
         </a>
       </footer>
-    </>
+      <HistoryPanel history={history} cursor={cursor} onJump={handleJump} />
+      <HelpPanel />
+    </div>
   )
 }
