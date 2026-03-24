@@ -30,12 +30,21 @@ body {
 
 /* ─── github link ───────────────────────────────────────────────────────── */
 
-.github-link {
+.page-footer {
   position: fixed;
-  top: 1.5rem;
-  left: 1.5rem;
+  bottom: 1rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.github-link {
   color: #555;
   transition: color 0.15s ease;
+  display: flex;
+  align-items: center;
 }
 
 .github-link:hover {
@@ -46,9 +55,9 @@ body {
 
 .help-panel {
   position: fixed;
-  top: 2rem;
+  top: 0;
   right: 0;
-  height: calc(100dvh - 4rem);
+  height: 100dvh;
   display: flex;
   align-items: stretch;
   font-size: 0.78rem;
@@ -61,20 +70,24 @@ body {
   transition:
     width 0.25s ease,
     opacity 0.2s ease;
-  width: 18rem;
+  width: calc((100vw - 44rem) / 2);
+  min-width: 10rem;
+  max-width: 18rem;
   opacity: 1;
 }
 
 .help-panel-collapsed .help-drawer {
   width: 0;
+  min-width: 0;
   opacity: 0;
 }
 
 .help-content {
   overflow-y: auto;
   height: 100%;
-  width: 18rem;
-  padding: 0 0.5rem 0 0.75rem;
+  padding: 1rem 0.5rem 1rem 0.75rem;
+  background: #222;
+  border-left: 1px solid #333;
 }
 
 .help-content::-webkit-scrollbar {
@@ -98,7 +111,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  align-self: stretch;
+  align-self: center;
+  height: 33%;
   padding: 0;
   flex-shrink: 0;
   transition:
@@ -146,6 +160,128 @@ body {
 
 .help-viable {
   color: #4ade80;
+}
+
+/* ─── history panel ─────────────────────────────────────────────────────── */
+
+.history-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100dvh;
+  display: flex;
+  align-items: stretch;
+  font-size: 0.78rem;
+  color: #aaa;
+  line-height: 1.5;
+}
+
+.history-drawer {
+  overflow: hidden;
+  transition:
+    width 0.25s ease,
+    opacity 0.2s ease;
+  width: calc((100vw - 44rem) / 2);
+  min-width: 10rem;
+  max-width: 18rem;
+  opacity: 1;
+}
+
+.history-panel-collapsed .history-drawer {
+  width: 0;
+  min-width: 0;
+  opacity: 0;
+}
+
+.history-content {
+  overflow-y: auto;
+  height: 100%;
+  padding: 1rem 0.75rem 1rem 0.5rem;
+  background: #222;
+  border-right: 1px solid #333;
+}
+
+.history-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.history-content::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 2px;
+}
+
+.history-toggle {
+  font-family: inherit;
+  font-size: 1rem;
+  background: #2a2a2a;
+  color: #555;
+  border: 1px solid #333;
+  border-radius: 0 3px 3px 0;
+  width: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  height: 33%;
+  padding: 0;
+  flex-shrink: 0;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.history-toggle:hover {
+  background: #333;
+  color: #8ab4f8;
+}
+
+.history-panel h2 {
+  font-size: 0.9rem;
+  color: #8ab4f8;
+  margin-bottom: 0.75rem;
+}
+
+.history-list {
+  list-style: none;
+}
+
+.history-list li {
+  padding: 0.15rem 0;
+}
+
+.history-list button {
+  font-family: inherit;
+  font-size: inherit;
+  color: #aaa;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.15rem 0.4rem;
+  border-radius: 2px;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-list button:hover {
+  background: #333;
+  color: #8ab4f8;
+}
+
+.history-current {
+  color: #4ade80;
+  font-weight: bold;
+  padding: 0.15rem 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-future {
+  opacity: 0.5;
 }
 
 /* ─── toolbar ────────────────────────────────────────────────────────────── */
@@ -423,7 +559,8 @@ body {
     padding: 1rem 0.5rem;
   }
 
-  .help-panel {
+  .help-panel,
+  .history-panel {
     display: none;
   }
 

@@ -33,22 +33,30 @@ can complete a full 12-tone row.
 Click any cell to edit its spelling. Right-click for enharmonic
 alternatives.
 
-Draft edits appear in yellow. Conflicting chromas are outlined in
-red. Missing pitch classes are shown on the row label.
+Draft edits appear in yellow. Duplicate notes are outlined in
+red. Missing notes are shown on the row label.
 
 | Key | Action |
 |---|---|
 | <kbd>Enter</kbd> | Confirm edit & commit row (if valid) |
 | <kbd>Escape</kbd> | Exit editing (keeps draft) |
-| <kbd>Tab</kbd> | Confirm & jump to next cell with same pitch class |
-| <kbd>Shift+Tab</kbd> | Confirm & jump to next conflicting pitch class |
+| <kbd>Tab</kbd> | Confirm & jump to next duplicate of same note |
+| <kbd>Shift+Tab</kbd> | Confirm & jump to next different duplicate |
 | <kbd>Space</kbd> | Toggle P/I row mode (preserves active cell) |
+| <kbd>Ctrl+Z</kbd> | Undo |
+| <kbd>Ctrl+Shift+Z</kbd> | Redo |
 
-Tab falls through to the next conflicting pitch class when no
-same-note cells remain.
+Tab falls through to the next different duplicate when no
+same-note duplicates remain.
 
 **Commit** applies a valid edited row as the new source row.
-**Revert** discards all drafts. **Undo** restores the previous source row.
+**Revert** discards all drafts.
+
+### History
+
+Full undo/redo history is shown in the left panel. Click any
+entry to jump to that state. The current state is highlighted
+in green; future (redoable) states are dimmed.
 
 ### Settings
 
