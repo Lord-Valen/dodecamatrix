@@ -51,6 +51,7 @@ export default function App() {
   ])
   const [cursor, setCursor] = useState(0)
   const [draftEdits, setDraftEdits] = useState<Map<number, string>>(new Map())
+  const [zen, setZen] = useState(false)
 
   const matrix = new Matrix(row, label, spellingMode, overrides)
 
@@ -175,6 +176,10 @@ export default function App() {
         if (e.shiftKey) handleRedo()
         else handleUndo()
       }
+      if (e.key === '.' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        setZen((z) => !z)
+      }
       if (e.key === 'Escape' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
         handleRevert()
@@ -187,7 +192,7 @@ export default function App() {
   const hasDrafts = draftEdits.size > 0
 
   return (
-    <div className="app">
+    <div className={`app${zen ? ' zen' : ''}`}>
       <div className="input-area">
         <div className="canonical-row">
           <span className="canonical-label">Source row: </span>

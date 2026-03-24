@@ -598,6 +598,17 @@ body {
   background: #444;
 }
 
+/* ─── zen mode ──────────────────────────────────────────────────────────── */
+
+.zen .help-panel,
+.zen .history-panel,
+.zen .page-footer,
+.zen .toolbar,
+.zen .action-bar,
+.zen .row-entry .btn {
+  display: none;
+}
+
 /* ─── mobile ────────────────────────────────────────────────────────────── */
 
 @media (max-width: 700px) {

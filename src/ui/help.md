@@ -46,6 +46,7 @@ red. Missing notes are shown on the row label.
 | <kbd>Escape</kbd> (no cell) | Revert all drafts |
 | <kbd>Ctrl+Z</kbd> | Undo (history) |
 | <kbd>Ctrl+Shift+Z</kbd> | Redo (history) |
+| <kbd>Ctrl+.</kbd> | Toggle zen mode |
 
 Tab falls through to the next different duplicate when no
 same-note duplicates remain.
