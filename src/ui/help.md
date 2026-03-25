@@ -44,7 +44,7 @@ red. Missing notes are shown on the row label.
 | <kbd>Tab</kbd> | Confirm & jump to next duplicate of same note |
 | <kbd>Shift+Tab</kbd> | Confirm & jump to next different duplicate |
 | <kbd>Space</kbd> | Toggle P/I row mode (preserves active cell) |
-| <kbd>Escape</kbd> (no cell) | Revert all drafts |
+| <kbd>Ctrl+Escape</kbd> | Revert all drafts |
 | <kbd>Ctrl+Z</kbd> | Undo (history) |
 | <kbd>Ctrl+Shift+Z</kbd> | Redo (history) |
 | <kbd>Ctrl+.</kbd> | Toggle zen mode |

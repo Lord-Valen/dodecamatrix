@@ -177,7 +177,6 @@ export default function App() {
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (document.activeElement?.tagName === 'INPUT') return
       if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
         if (e.shiftKey) handleRedo()
@@ -190,6 +189,10 @@ export default function App() {
       if (e.key === 'Escape' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
         handleRevert()
+      }
+      if (e.key === ' ' && document.activeElement?.tagName !== 'INPUT') {
+        e.preventDefault()
+        setTransposed((t) => !t)
       }
     }
     window.addEventListener('keydown', onKeyDown)
