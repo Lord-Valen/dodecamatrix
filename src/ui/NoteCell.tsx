@@ -26,13 +26,16 @@ interface NoteCellProps {
   isDraft: boolean
   conflict: boolean
   highlighted: boolean
+  focused: boolean
   cellId: string
   onEdit: (note: string) => void
+  onClick?: () => void
   onOverride: (note: string) => void
   onTab?: (newNote: string) => void
   onShiftTab?: (newNote: string) => void
   onCommit?: () => void
   onTranspose?: () => void
+  onEscape?: () => void
 }
 
 export function NoteCell({
@@ -41,13 +44,16 @@ export function NoteCell({
   isDraft,
   conflict,
   highlighted,
+  focused,
   onEdit,
   cellId,
+  onClick: onClickProp,
   onOverride,
   onTab,
   onShiftTab,
   onCommit,
   onTranspose,
+  onEscape,
 }: NoteCellProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(note)
@@ -56,6 +62,7 @@ export function NoteCell({
   const preEdit = useRef(note)
 
   function startEdit() {
+    onClickProp?.()
     committed.current = false
     preEdit.current = note
     setDraft(note)
@@ -85,7 +92,10 @@ export function NoteCell({
       commit()
       onCommit?.()
     }
-    if (e.key === 'Escape') commit()
+    if (e.key === 'Escape') {
+      commit()
+      onEscape?.()
+    }
     if (e.key === ' ') {
       e.preventDefault()
       commit()
@@ -129,7 +139,7 @@ export function NoteCell({
 
   return (
     <td
-      className={`note-cell${isDraft ? ' draft' : ''}${conflict ? ' conflict' : ''}${highlighted ? ' highlighted' : ''}`}
+      className={`note-cell${isDraft ? ' draft' : ''}${conflict ? ' conflict' : ''}${highlighted ? ' highlighted' : ''}${focused ? ' focused' : ''}`}
       data-cell={cellId}
       onClick={startEdit}
       onContextMenu={handleContextMenu}

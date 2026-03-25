@@ -2,22 +2,31 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useEffect, useRef } from 'react'
+import { type Ref, useEffect, useImperativeHandle, useRef } from 'react'
 import { Note } from 'tonal'
 import { remainingChromas } from '../theory/cells'
 import type { CellId, Matrix, RowLabel } from '../theory/matrix'
 import { validateRow } from '../theory/row'
 import { NoteCell } from './NoteCell'
 
+export interface GridHandle {
+  focus: () => void
+  blur: () => void
+  clickCell: (row: number, col: number) => void
+}
+
 interface GridProps {
   matrix: Matrix
   transposed: boolean
   draftEdits: Map<number, string>
   highlights: Set<number>
+  cursor: [number, number] | null
+  onCursorChange: (cursor: [number, number] | null) => void
   onCellEdit: (matrixRow: number, matrixCol: number, note: string) => void
   onOverride: (cell: CellId, note: string) => void
   onCommit: () => void
   onTranspose: () => void
+  ref?: Ref<GridHandle>
   header?: React.ReactNode
   footer?: React.ReactNode
 }
@@ -27,10 +36,13 @@ export function Grid({
   transposed,
   draftEdits,
   highlights,
+  cursor,
+  onCursorChange: setCursor,
   onCellEdit,
   onOverride,
   onCommit,
   onTranspose,
+  ref,
   header,
   footer,
 }: GridProps) {
@@ -85,6 +97,12 @@ export function Grid({
     target?.click()
   }
 
+  useImperativeHandle(ref, () => ({
+    focus: () => focusRef.current?.focus(),
+    blur: () => focusRef.current?.blur(),
+    clickCell,
+  }))
+
   /** Tab: cycle through cells with the same pitch class, then fall through to next conflict */
   function tabSameChroma(fromRow: number, fromCol: number, chroma: number) {
     const rowCells = Array.from({ length: 12 }, (_, c) => cell(fromRow, c))
@@ -116,135 +134,150 @@ export function Grid({
     }
   }
 
+  const focusRef = useRef<HTMLDivElement>(null)
+
   return (
-    <table className="matrix-grid" ref={tableRef}>
-      {header && (
+    <div className="grid-focus-container" ref={focusRef} tabIndex={0}>
+      <table className="matrix-grid" ref={tableRef}>
+        {header && (
+          <thead>
+            <tr>
+              <th />
+              <th colSpan={12} className="grid-header">
+                {header}
+              </th>
+              <th />
+            </tr>
+          </thead>
+        )}
         <thead>
           <tr>
             <th />
-            <th colSpan={12} className="grid-header">
-              {header}
-            </th>
+            {Array.from({ length: 12 }, (_, c) => {
+              const label = colLabel(c)
+              const labelClass = colHasDraft[c]
+                ? `col-label ${colValid[c] ? 'row-valid' : 'row-invalid'}`
+                : 'col-label'
+              return (
+                <th key={c} className={labelClass}>
+                  {label}
+                </th>
+              )
+            })}
             <th />
           </tr>
         </thead>
-      )}
-      <thead>
-        <tr>
-          <th />
-          {Array.from({ length: 12 }, (_, c) => {
-            const label = colLabel(c)
-            const labelClass = colHasDraft[c]
-              ? `col-label ${colValid[c] ? 'row-valid' : 'row-invalid'}`
-              : 'col-label'
-            return (
-              <th key={c} className={labelClass}>
-                {label}
-              </th>
-            )
-          })}
-          <th />
-        </tr>
-      </thead>
-      <tbody>
-        {Array.from({ length: 12 }, (_, r) => {
-          const label = rowLabel(r)
-          const form = label[0] as 'P' | 'I'
-          const index = parseInt(label.slice(1), 10)
-          const cells = Array.from({ length: 12 }, (_, c) => cell(r, c))
-          const rowHasDraft = cells.some((c) => c.isDraft)
-          const rowValid = rowHasDraft && validateRow(cells.map((c) => c.note))
-          const labelClass = rowHasDraft
-            ? `row-label ${rowValid ? 'row-valid' : 'row-invalid'}`
-            : 'row-label'
+        <tbody>
+          {Array.from({ length: 12 }, (_, r) => {
+            const label = rowLabel(r)
+            const form = label[0] as 'P' | 'I'
+            const index = parseInt(label.slice(1), 10)
+            const cells = Array.from({ length: 12 }, (_, c) => cell(r, c))
+            const rowHasDraft = cells.some((c) => c.isDraft)
+            const rowValid =
+              rowHasDraft && validateRow(cells.map((c) => c.note))
+            const labelClass = rowHasDraft
+              ? `row-label ${rowValid ? 'row-valid' : 'row-invalid'}`
+              : 'row-label'
 
-          // Find duplicate chromas and missing notes within the row
-          const rowConflicts = new Set<number>()
-          let missingNotes: string[] = []
-          if (rowHasDraft && !rowValid) {
-            const chromas = cells.map((c) => Note.get(c.note).chroma)
-            const seen = new Set<number>()
-            for (const ch of chromas) {
-              if (seen.has(ch)) rowConflicts.add(ch)
-              else seen.add(ch)
+            // Find duplicate chromas and missing notes within the row
+            const rowConflicts = new Set<number>()
+            let missingNotes: string[] = []
+            if (rowHasDraft && !rowValid) {
+              const chromas = cells.map((c) => Note.get(c.note).chroma)
+              const seen = new Set<number>()
+              for (const ch of chromas) {
+                if (seen.has(ch)) rowConflicts.add(ch)
+                else seen.add(ch)
+              }
+              missingNotes = remainingChromas(seen)
             }
-            missingNotes = remainingChromas(seen)
-          }
 
-          return (
-            <tr key={r}>
-              <th className={labelClass}>
-                {label}
-                {missingNotes.length > 0 && (
-                  <div className="missing-notes">{missingNotes.join(' ')}</div>
-                )}
-              </th>
-              {cells.map(({ note, isDraft }, c) => {
-                const [mr, mc] = transposed ? [c, r] : [r, c]
-                const chroma = Note.get(note).chroma
-                return (
-                  <NoteCell
-                    key={c}
-                    note={note}
-                    chroma={chroma}
-                    isDraft={isDraft}
-                    conflict={rowConflicts.has(chroma)}
-                    highlighted={highlights.has(mr * 12 + mc)}
-                    cellId={`${r}-${c}`}
-                    onEdit={(n) => onCellEdit(mr, mc, n)}
-                    onOverride={(n) =>
-                      onOverride({ form, index, position: c }, n)
-                    }
-                    onTab={(newNote) =>
-                      tabSameChroma(r, c, Note.get(newNote).chroma)
-                    }
-                    onShiftTab={(newNote) =>
-                      tabNextChroma(r, c, Note.get(newNote).chroma)
-                    }
-                    onCommit={onCommit}
-                    onTranspose={() => {
-                      pendingCell.current = `${c}-${r}`
-                      onTranspose()
-                    }}
-                  />
-                )
-              })}
-              <th className={`${labelClass} retro-label`}>
-                {retroLabel(label)}
-                {missingNotes.length > 0 && (
-                  <div className="missing-notes">{missingNotes.join(' ')}</div>
-                )}
-              </th>
-            </tr>
-          )
-        })}
-      </tbody>
-      <tfoot>
-        <tr>
-          <th />
-          {Array.from({ length: 12 }, (_, c) => {
-            const label = colLabel(c)
-            const labelClass = colHasDraft[c]
-              ? `col-label retro-label ${colValid[c] ? 'row-valid' : 'row-invalid'}`
-              : 'col-label retro-label'
             return (
-              <th key={c} className={labelClass}>
-                {retroLabel(label)}
-              </th>
+              <tr key={r}>
+                <th className={labelClass}>
+                  {label}
+                  {missingNotes.length > 0 && (
+                    <div className="missing-notes">
+                      {missingNotes.join(' ')}
+                    </div>
+                  )}
+                </th>
+                {cells.map(({ note, isDraft }, c) => {
+                  const [mr, mc] = transposed ? [c, r] : [r, c]
+                  const chroma = Note.get(note).chroma
+                  return (
+                    <NoteCell
+                      key={c}
+                      note={note}
+                      chroma={chroma}
+                      isDraft={isDraft}
+                      conflict={rowConflicts.has(chroma)}
+                      highlighted={highlights.has(mr * 12 + mc)}
+                      cellId={`${r}-${c}`}
+                      focused={cursor?.[0] === r && cursor?.[1] === c}
+                      onEdit={(n) => onCellEdit(mr, mc, n)}
+                      onOverride={(n) =>
+                        onOverride({ form, index, position: c }, n)
+                      }
+                      onClick={() => setCursor([r, c])}
+                      onTab={(newNote) => {
+                        tabSameChroma(r, c, Note.get(newNote).chroma)
+                      }}
+                      onShiftTab={(newNote) => {
+                        tabNextChroma(r, c, Note.get(newNote).chroma)
+                      }}
+                      onCommit={onCommit}
+                      onTranspose={() => {
+                        pendingCell.current = `${c}-${r}`
+                        onTranspose()
+                      }}
+                      onEscape={() => {
+                        setCursor([r, c])
+                        focusRef.current?.focus()
+                      }}
+                    />
+                  )
+                })}
+                <th className={`${labelClass} retro-label`}>
+                  {retroLabel(label)}
+                  {missingNotes.length > 0 && (
+                    <div className="missing-notes">
+                      {missingNotes.join(' ')}
+                    </div>
+                  )}
+                </th>
+              </tr>
             )
           })}
-          <th />
-        </tr>
-        {footer && (
+        </tbody>
+        <tfoot>
           <tr>
             <th />
-            <th colSpan={12} className="grid-footer">
-              {footer}
-            </th>
+            {Array.from({ length: 12 }, (_, c) => {
+              const label = colLabel(c)
+              const labelClass = colHasDraft[c]
+                ? `col-label retro-label ${colValid[c] ? 'row-valid' : 'row-invalid'}`
+                : 'col-label retro-label'
+              return (
+                <th key={c} className={labelClass}>
+                  {retroLabel(label)}
+                </th>
+              )
+            })}
             <th />
           </tr>
-        )}
-      </tfoot>
-    </table>
+          {footer && (
+            <tr>
+              <th />
+              <th colSpan={12} className="grid-footer">
+                {footer}
+              </th>
+              <th />
+            </tr>
+          )}
+        </tfoot>
+      </table>
+    </div>
   )
 }

@@ -29,26 +29,18 @@ All valid candidate cells are shown below the input. Click any to
 insert it. <span class="help-viable">Green</span> candidates
 can complete a full 12-tone row.
 
-### Matrix Editing
+### Matrix Navigation (Normal Mode)
 
-Click any cell to edit its spelling. Right-click for enharmonic
-alternatives.
+Press any arrow key to enter normal mode. The focused cell is
+shown with a blue outline.
+
+### Cell Editing
+
+Click any cell or press <kbd>Enter</kbd> on the focused cell to
+edit its spelling. Right-click for enharmonic alternatives.
 
 Draft edits appear in yellow. Duplicate notes are outlined in
 red. Missing notes are shown on the row label.
-
-| Key | Action |
-|---|---|
-| <kbd>Enter</kbd> | Confirm edit & commit row (if valid) |
-| <kbd>Escape</kbd> | Exit editing (keeps draft) |
-| <kbd>Tab</kbd> | Confirm & jump to next duplicate of same note |
-| <kbd>Shift+Tab</kbd> | Confirm & jump to next different duplicate |
-| <kbd>Space</kbd> | Toggle P/I row mode (preserves active cell) |
-| <kbd>Ctrl+Escape</kbd> | Revert all drafts |
-| <kbd>Ctrl+Z</kbd> | Undo (history) |
-| <kbd>Ctrl+Shift+Z</kbd> | Redo (history) |
-| <kbd>Ctrl+.</kbd> | Toggle zen mode |
-| <kbd>Ctrl+F</kbd> | Focus search bar |
 
 Tab falls through to the next different duplicate when no
 same-note duplicates remain.

@@ -2,16 +2,18 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import './App.css'
+import { KEYMAP, useKeymap } from './keymap'
 import type { CellId, Override, RowLabel, SpellingMode } from './theory/matrix'
 import { Matrix } from './theory/matrix'
 import { validateRow } from './theory/row'
 import { matchToCellKeys, searchSequence } from './theory/search'
-import { Grid } from './ui/Grid'
+import { Grid, type GridHandle } from './ui/Grid'
 import { HelpPanel } from './ui/HelpPanel'
 import { HistoryPanel } from './ui/HistoryPanel'
 import { RowEntry } from './ui/RowEntry'
+import type { SearchInputHandle } from './ui/SearchInput'
 import { SearchInput } from './ui/SearchInput'
 import { SpellingToggle } from './ui/SpellingToggle'
 import { TransposeButton } from './ui/TransposeButton'
@@ -55,6 +57,9 @@ export default function App() {
   const [draftEdits, setDraftEdits] = useState<Map<number, string>>(new Map())
   const [zen, setZen] = useState(false)
   const [searchNotes, setSearchNotes] = useState<string[]>([])
+  const [gridCursor, setGridCursor] = useState<[number, number] | null>(null)
+  const gridRef = useRef<GridHandle>(null)
+  const searchRef = useRef<SearchInputHandle>(null)
 
   const matrix = new Matrix(row, label, spellingMode, overrides)
   const highlights = useMemo(
@@ -77,6 +82,7 @@ export default function App() {
 
   function handleRowEntry(newRow: string[], newLabel: RowLabel) {
     pushState(newRow, newLabel)
+    setGridCursor(null)
   }
 
   function handleCellEdit(matrixRow: number, matrixCol: number, note: string) {
@@ -175,28 +181,54 @@ export default function App() {
     }
   }
 
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        if (e.shiftKey) handleRedo()
-        else handleUndo()
+  const spellingModes: SpellingMode[] = [
+    'interval-invariant',
+    'hybrid',
+    'pitch-class-invariant',
+  ]
+
+  function moveCursor(dr: number, dc: number) {
+    setGridCursor((prev) => {
+      if (!prev) return [0, 0]
+      return [
+        (((prev[0] + dr) % 12) + 12) % 12,
+        (((prev[1] + dc) % 12) + 12) % 12,
+      ]
+    })
+    gridRef.current?.focus()
+  }
+
+  useKeymap(KEYMAP, {
+    undo: () => handleUndo(),
+    redo: () => handleRedo(),
+    toggleZen: () => setZen((z) => !z),
+    revert: () => handleRevert(),
+    focusSearch: () => searchRef.current?.focus(),
+    cursorUp: () => moveCursor(-1, 0),
+    cursorDown: () => moveCursor(1, 0),
+    cursorLeft: () => moveCursor(0, -1),
+    cursorRight: () => moveCursor(0, 1),
+    enterCell: () => {
+      if (gridCursor) gridRef.current?.clickCell(...gridCursor)
+      else {
+        setGridCursor([0, 0])
+        gridRef.current?.focus()
       }
-      if (e.key === '.' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        setZen((z) => !z)
-      }
-      if (e.key === 'Escape' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        handleRevert()
-      }
-      if (e.key === ' ' && document.activeElement?.tagName !== 'INPUT') {
-        e.preventDefault()
-        setTransposed((t) => !t)
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    },
+    exitGrid: () => gridRef.current?.blur(),
+    transpose: () => setTransposed((t) => !t),
+    spellingNext: () =>
+      setSpellingMode((prev) => {
+        const i = spellingModes.indexOf(prev)
+        return spellingModes[(i + 1) % spellingModes.length]
+      }),
+    spellingPrev: () =>
+      setSpellingMode((prev) => {
+        const i = spellingModes.indexOf(prev)
+        return spellingModes[
+          (i + spellingModes.length - 1) % spellingModes.length
+        ]
+      }),
   })
 
   const hasDrafts = draftEdits.size > 0
@@ -212,9 +244,12 @@ export default function App() {
       </div>
       <div className="matrix-container">
         <Grid
+          ref={gridRef}
           matrix={matrix}
           transposed={transposed}
           draftEdits={draftEdits}
+          cursor={gridCursor}
+          onCursorChange={setGridCursor}
           highlights={highlights}
           onCellEdit={handleCellEdit}
           onOverride={handleOverride}
@@ -240,7 +275,7 @@ export default function App() {
               >
                 &#x2717;
               </button>
-              <SearchInput onSearch={setSearchNotes} />
+              <SearchInput ref={searchRef} onSearch={setSearchNotes} />
             </div>
           }
           footer={

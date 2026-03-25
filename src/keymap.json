@@ -1,0 +1,98 @@
+{
+  "global": [
+    { "key": "z", "ctrl": true, "action": "undo", "description": "Undo" },
+    {
+      "key": "z",
+      "ctrl": true,
+      "shift": true,
+      "action": "redo",
+      "description": "Redo"
+    },
+    {
+      "key": ".",
+      "ctrl": true,
+      "action": "toggleZen",
+      "description": "Toggle zen mode"
+    },
+    {
+      "key": "Escape",
+      "ctrl": true,
+      "action": "revert",
+      "description": "Revert all drafts"
+    },
+    {
+      "key": "f",
+      "ctrl": true,
+      "action": "focusSearch",
+      "description": "Focus search bar"
+    }
+  ],
+  "normal": [
+    { "key": "ArrowUp", "action": "cursorUp", "description": "Move cursor up" },
+    {
+      "key": "ArrowDown",
+      "action": "cursorDown",
+      "description": "Move cursor down"
+    },
+    {
+      "key": "ArrowLeft",
+      "action": "cursorLeft",
+      "description": "Move cursor left"
+    },
+    {
+      "key": "ArrowRight",
+      "action": "cursorRight",
+      "description": "Move cursor right"
+    },
+    {
+      "key": "Enter",
+      "action": "enterCell",
+      "description": "Edit focused cell"
+    },
+    {
+      "key": "Escape",
+      "action": "exitGrid",
+      "description": "Exit normal mode"
+    },
+    { "key": " ", "action": "transpose", "description": "Toggle P/I row mode" },
+    {
+      "key": "s",
+      "action": "spellingNext",
+      "description": "Next spelling mode"
+    },
+    {
+      "key": "s",
+      "shift": true,
+      "action": "spellingPrev",
+      "description": "Previous spelling mode"
+    }
+  ],
+  "edit": [
+    {
+      "key": "Escape",
+      "action": "exitEdit",
+      "description": "Exit editing (return to normal mode)"
+    },
+    {
+      "key": "Enter",
+      "action": "commitEdit",
+      "description": "Confirm edit & commit row (if valid)"
+    },
+    {
+      "key": "Tab",
+      "action": "tabSameChroma",
+      "description": "Confirm & jump to next duplicate of same note"
+    },
+    {
+      "key": "Tab",
+      "shift": true,
+      "action": "tabNextChroma",
+      "description": "Confirm & jump to next different duplicate"
+    },
+    {
+      "key": " ",
+      "action": "transposeEdit",
+      "description": "Toggle P/I row mode (preserves active cell)"
+    }
+  ]
+}

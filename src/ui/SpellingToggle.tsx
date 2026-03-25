@@ -26,7 +26,10 @@ export function SpellingToggle({ mode, onChange }: SpellingToggleProps) {
             name="spelling-mode"
             value={value}
             checked={mode === value}
-            onChange={() => onChange(value)}
+            onChange={(e) => {
+              onChange(value)
+              e.target.blur()
+            }}
           />
           {label}
         </label>
