@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Note } from 'tonal'
 
 interface SearchInputProps {
@@ -24,6 +24,7 @@ function parseSearchNotes(input: string): string[] {
 
 export function SearchInput({ onSearch }: SearchInputProps) {
   const [input, setInput] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
   function handleChange(value: string) {
     setInput(value)
@@ -35,12 +36,30 @@ export function SearchInput({ onSearch }: SearchInputProps) {
     onSearch([])
   }
 
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'f' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        inputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  })
+
   return (
     <div className="search-input">
       <input
+        ref={inputRef}
         type="text"
         value={input}
         onChange={(e) => handleChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            handleClear()
+            inputRef.current?.blur()
+          }
+        }}
         placeholder="Search: C D E"
       />
       {input && (

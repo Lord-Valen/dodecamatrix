@@ -10,9 +10,17 @@ A 12-tone serial composition matrix built with React. Enter a tone row, and the 
 
 ## Features
 
+### Dynamic matrix editing
+
+Click any cell to edit its spelling in place. Drafts appear in yellow with real-time conflict detection — duplicate pitch classes are outlined in red, and missing notes are shown on the row label. Tab cycles through duplicates so you can fix conflicts without leaving the keyboard. Commit a valid row with Enter; it becomes the new source row and the entire matrix updates.
+
+### Sequence search
+
+Type a sequence of notes to instantly highlight every occurrence across all 48 row forms (P, I, R, RI). Enharmonic spellings are treated as equivalent (C# matches Db). Use it to find motivic connections, verify combinatorial properties, or trace a pitch sequence through the matrix. Focus the search bar with Ctrl+F.
+
 ### Row entry with cell completion
 
-Type 12 notes to set the source row. Use commas to group notes into cells — the first cell defines an interval pattern that auto-completes subsequent cells.
+Type 12 notes to set the source row. Use commas to group notes into cells — the first cell defines an interval pattern that auto-completes subsequent cells. All four forms are accepted as input labels (P, I, R, RI); retrogrades are back-calculated automatically.
 
 ```
 P0 C E G#, F A C#, Bb D F#, Eb G B
@@ -29,10 +37,6 @@ Three strategies for naming notes in the matrix:
 - **Interval** — preserves fifths-based letter names across transpositions (C E G# transposes to F A C#, not F A Db)
 - **Pitch Class** — normalizes every cell to the source row's note names
 - **Hybrid** — respells inversion starting notes from the source row, then builds with intervals
-
-### Matrix editing
-
-Click any cell to retype it. Right-click for a menu of enharmonic alternatives. Edits appear as yellow drafts; conflicting chromas are outlined in red. **Commit** applies a valid edited row as the new source. **Revert** discards drafts. **Undo** restores the previous source row.
 
 ### Transpose
 
@@ -58,11 +62,13 @@ The theory layer (`src/theory/`) is pure functions with no UI dependencies:
 - **matrix.ts** — the Matrix class: builds the 12x12 grid, applies spelling modes and overrides
 - **row.ts** — row construction, inversion, interval extraction, validation
 - **cells.ts** — cell pattern analysis, auto-completion, candidate generation with recursive viability checking
+- **search.ts** — sequence search across all 48 row forms
 
 The UI layer (`src/ui/`) renders the matrix and handles input:
 
 - **Grid.tsx** — the 12x12 table with row/column labels and retrograde labels
 - **NoteCell.tsx** — individual cell editing and enharmonic context menu
 - **RowEntry.tsx** — input parsing, live feedback, cell completion UI
-- **HelpPanel.tsx** — collapsible reference sidebar
+- **SearchInput.tsx** — sequence search input with live highlighting
+- **HelpPanel.tsx** / **HistoryPanel.tsx** — collapsible side panels
 - **SpellingToggle.tsx** / **TransposeButton.tsx** — settings controls

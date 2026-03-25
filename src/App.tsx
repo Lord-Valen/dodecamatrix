@@ -237,11 +237,11 @@ export default function App() {
               >
                 &#x2717;
               </button>
+              <SearchInput onSearch={setSearchNotes} />
             </div>
           }
           footer={
             <div>
-              <SearchInput onSearch={setSearchNotes} />
               <div className="toolbar">
                 <SpellingToggle
                   mode={spellingMode}

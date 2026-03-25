@@ -9,7 +9,8 @@ SPDX-License-Identifier: CC0-1.0
 ### Input
 
 Type 12 notes separated by spaces. Optionally prefix with a label
-like `P0` or `I3`.
+like `P0`, `I3`, `R5`, or `RI7`. Retrograde forms are reversed
+automatically.
 
 Use commas to mark cell boundaries. The first cell defines the
 interval pattern for all cells.
@@ -47,12 +48,20 @@ red. Missing notes are shown on the row label.
 | <kbd>Ctrl+Z</kbd> | Undo (history) |
 | <kbd>Ctrl+Shift+Z</kbd> | Redo (history) |
 | <kbd>Ctrl+.</kbd> | Toggle zen mode |
+| <kbd>Ctrl+F</kbd> | Focus search bar |
 
 Tab falls through to the next different duplicate when no
 same-note duplicates remain.
 
 **Commit** applies a valid edited row as the new source row.
 **Revert** discards all drafts.
+
+### Search
+
+Type notes in the search bar to highlight every matching
+sequence across all 48 row forms (P, I, R, RI). Enharmonic
+spellings are treated as equivalent (C# matches Db).
+Press <kbd>Escape</kbd> to clear.
 
 ### History
 
