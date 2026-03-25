@@ -16,9 +16,9 @@ interface RowEntryProps {
   onSubmit: (row: string[], label: RowLabel) => void
 }
 
-const LABEL_RE = /^([PI])(\d{1,2})$/
+const LABEL_RE = /^(P|I|R|RI)(\d{1,2})$/i
 
-function parseInput(
+export function parseInput(
   input: string,
 ): { row: string[]; label: RowLabel } | { error: string } {
   const parts = input
@@ -33,12 +33,16 @@ function parseInput(
   if (parts.length === 13) {
     const match = LABEL_RE.exec(parts[0])
     if (!match) return { error: `Invalid label: ${parts[0]}` }
-    const form = match[1] as FormType
+    const rawForm = match[1].toUpperCase()
     const index = parseInt(match[2], 10)
     if (index < 0 || index > 11)
       return { error: `Label index must be 0–11, got ${index}` }
+    const isRetrograde = rawForm === 'R' || rawForm === 'RI'
+    const form: FormType =
+      rawForm === 'R' ? 'P' : rawForm === 'RI' ? 'I' : (rawForm as FormType)
     label = `${form}${index}` as RowLabel
     notes = parts.slice(1)
+    if (isRetrograde) notes.reverse()
   } else if (parts.length === 12) {
     label = 'P0'
     notes = parts
