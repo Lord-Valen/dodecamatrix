@@ -13,6 +13,7 @@ interface GridProps {
   matrix: Matrix
   transposed: boolean
   draftEdits: Map<number, string>
+  highlights: Set<number>
   onCellEdit: (matrixRow: number, matrixCol: number, note: string) => void
   onOverride: (cell: CellId, note: string) => void
   onCommit: () => void
@@ -25,6 +26,7 @@ export function Grid({
   matrix,
   transposed,
   draftEdits,
+  highlights,
   onCellEdit,
   onOverride,
   onCommit,
@@ -187,6 +189,7 @@ export function Grid({
                     chroma={chroma}
                     isDraft={isDraft}
                     conflict={rowConflicts.has(chroma)}
+                    highlighted={highlights.has(mr * 12 + mc)}
                     cellId={`${r}-${c}`}
                     onEdit={(n) => onCellEdit(mr, mc, n)}
                     onOverride={(n) =>

@@ -2,15 +2,17 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import type { CellId, Override, RowLabel, SpellingMode } from './theory/matrix'
 import { Matrix } from './theory/matrix'
 import { validateRow } from './theory/row'
+import { matchToCellKeys, searchSequence } from './theory/search'
 import { Grid } from './ui/Grid'
 import { HelpPanel } from './ui/HelpPanel'
 import { HistoryPanel } from './ui/HistoryPanel'
 import { RowEntry } from './ui/RowEntry'
+import { SearchInput } from './ui/SearchInput'
 import { SpellingToggle } from './ui/SpellingToggle'
 import { TransposeButton } from './ui/TransposeButton'
 
@@ -52,8 +54,13 @@ export default function App() {
   const [cursor, setCursor] = useState(0)
   const [draftEdits, setDraftEdits] = useState<Map<number, string>>(new Map())
   const [zen, setZen] = useState(false)
+  const [searchNotes, setSearchNotes] = useState<string[]>([])
 
   const matrix = new Matrix(row, label, spellingMode, overrides)
+  const highlights = useMemo(
+    () => matchToCellKeys(matrix, searchSequence(matrix, searchNotes)),
+    [matrix, searchNotes],
+  )
 
   function pushState(newRow: string[], newLabel: RowLabel) {
     const description = `${newLabel} ${newRow.join(' ')}`
@@ -205,6 +212,7 @@ export default function App() {
           matrix={matrix}
           transposed={transposed}
           draftEdits={draftEdits}
+          highlights={highlights}
           onCellEdit={handleCellEdit}
           onOverride={handleOverride}
           onCommit={handleCommit}
@@ -232,15 +240,18 @@ export default function App() {
             </div>
           }
           footer={
-            <div className="toolbar">
-              <SpellingToggle
-                mode={spellingMode}
-                onChange={handleSpellingChange}
-              />
-              <TransposeButton
-                transposed={transposed}
-                onChange={setTransposed}
-              />
+            <div>
+              <SearchInput onSearch={setSearchNotes} />
+              <div className="toolbar">
+                <SpellingToggle
+                  mode={spellingMode}
+                  onChange={handleSpellingChange}
+                />
+                <TransposeButton
+                  transposed={transposed}
+                  onChange={setTransposed}
+                />
+              </div>
             </div>
           }
         />

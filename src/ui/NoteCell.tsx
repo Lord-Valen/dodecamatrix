@@ -25,6 +25,7 @@ interface NoteCellProps {
   chroma: number
   isDraft: boolean
   conflict: boolean
+  highlighted: boolean
   cellId: string
   onEdit: (note: string) => void
   onOverride: (note: string) => void
@@ -39,6 +40,7 @@ export function NoteCell({
   chroma,
   isDraft,
   conflict,
+  highlighted,
   onEdit,
   cellId,
   onOverride,
@@ -127,7 +129,7 @@ export function NoteCell({
 
   return (
     <td
-      className={`note-cell${isDraft ? ' draft' : ''}${conflict ? ' conflict' : ''}`}
+      className={`note-cell${isDraft ? ' draft' : ''}${conflict ? ' conflict' : ''}${highlighted ? ' highlighted' : ''}`}
       data-cell={cellId}
       onClick={startEdit}
       onContextMenu={handleContextMenu}
