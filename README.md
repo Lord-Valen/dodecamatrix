@@ -14,6 +14,8 @@ A 12-tone serial composition matrix built with React. Enter a tone row, and the 
 
 Click any cell to edit its spelling in place. Drafts appear in yellow with real-time conflict detection — duplicate pitch classes are outlined in red, and missing notes are shown on the row label. Tab cycles through duplicates so you can fix conflicts without leaving the keyboard. Commit a valid row with Enter; it becomes the new source row and the entire matrix updates.
 
+Arrow keys activate a vim-style **normal mode** for keyboard-driven navigation. The cursor only appears when you start using it — mouse-only users never see it.
+
 ### Sequence search
 
 Type a sequence of notes to instantly highlight every occurrence across all 48 row forms (P, I, R, RI). Enharmonic spellings are treated as equivalent (C# matches Db). Use it to find motivic connections, verify combinatorial properties, or trace a pitch sequence through the matrix. Focus the search bar with Ctrl+F.
@@ -63,6 +65,7 @@ The theory layer (`src/theory/`) is pure functions with no UI dependencies:
 - **row.ts** — row construction, inversion, interval extraction, validation
 - **cells.ts** — cell pattern analysis, auto-completion, candidate generation with recursive viability checking
 - **search.ts** — sequence search across all 48 row forms
+- **keymap.ts** / **keymap.json** — centralized modal keymap (global, normal, edit modes)
 
 The UI layer (`src/ui/`) renders the matrix and handles input:
 
@@ -70,5 +73,6 @@ The UI layer (`src/ui/`) renders the matrix and handles input:
 - **NoteCell.tsx** — individual cell editing and enharmonic context menu
 - **RowEntry.tsx** — input parsing, live feedback, cell completion UI
 - **SearchInput.tsx** — sequence search input with live highlighting
+- **KeymapCheatSheet.tsx** — auto-generated keybinding reference from `keymap.json`
 - **HelpPanel.tsx** / **HistoryPanel.tsx** — collapsible side panels
 - **SpellingToggle.tsx** / **TransposeButton.tsx** — settings controls

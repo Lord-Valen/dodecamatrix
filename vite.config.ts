@@ -18,6 +18,5 @@ function markdown(): import('vite').Plugin {
 }
 
 export default defineConfig({
-  base: '/dodecamatrix/',
   plugins: [markdown(), react()],
 })

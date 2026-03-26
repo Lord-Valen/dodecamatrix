@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" width="16px" height="16px" viewBox="0.1 0.1 5.0 5.0">
+  <!-- Background -->
+  <rect x="0.1" y="0.1" width="5.0" height="5.0" fill="#1a1a2e"/>
+  <!-- Left bracket -->
+  <path d="M1.2,0.2 H0.2 V5.0 H1.2" fill="none" stroke="#e0e0e0" stroke-width="0.18" stroke-linecap="square"/>
+  <!-- Right bracket -->
+  <path d="M4.0,0.2 H5.0 V5.0 H4.0" fill="none" stroke="#e0e0e0" stroke-width="0.18" stroke-linecap="square"/>
+  <!-- Note (centered at x=2.6) -->
+  <g transform="translate(-0.4, -0.6)">
+    <!-- Stem -->
+    <g transform="translate(3.2392, 1.5000)">
+      <rect x="-0.0650" y="-0.5000" width="0.1300" height="3.3139" ry="0.0400" fill="#d4a843"/>
+    </g>
+    <!-- Flag -->
+    <g transform="translate(3.3042, 1.0400)">
+      <path transform="scale(0.0040, -0.0040)" d="M0 0v-250h-16v250h16zM0 0c0 -197 207 -336 207 -533c0 -71 -15 -141 -41 -207c-5 -8 -13 -12 -20 -12c-13 0 -26 11 -23 27c26 61 42 126 42 192c0 103 -94 208 -165 283v250z" fill="#d4a843"/>
+    </g>
+    <!-- Note head -->
+    <g transform="translate(2.0000, 4.5000)">
+      <path transform="scale(0.0040, -0.0040)" d="M218 136c66 0 108 -36 108 -89c0 -89 -113 -183 -218 -183c-66 0 -108 36 -108 89c0 89 113 183 218 183z" fill="#d4a843"/>
+    </g>
+  </g>
+</svg>

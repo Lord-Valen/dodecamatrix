@@ -29,10 +29,11 @@ All valid candidate cells are shown below the input. Click any to
 insert it. <span class="help-viable">Green</span> candidates
 can complete a full 12-tone row.
 
-### Matrix Navigation (Normal Mode)
+### Matrix Navigation
 
-Press any arrow key to enter normal mode. The focused cell is
-shown with a blue outline.
+Press any arrow key to enter **normal mode**. The focused cell
+is shown with a blue outline. The cursor only appears once you
+start using arrow keys — it stays hidden for mouse-only users.
 
 ### Cell Editing
 
@@ -42,9 +43,6 @@ edit its spelling. Right-click for enharmonic alternatives.
 Draft edits appear in yellow. Duplicate notes are outlined in
 red. Missing notes are shown on the row label.
 
-Tab falls through to the next different duplicate when no
-same-note duplicates remain.
-
 **Commit** applies a valid edited row as the new source row.
 **Revert** discards all drafts.
 
@@ -53,7 +51,6 @@ same-note duplicates remain.
 Type notes in the search bar to highlight every matching
 sequence across all 48 row forms (P, I, R, RI). Enharmonic
 spellings are treated as equivalent (C# matches Db).
-Press <kbd>Escape</kbd> to clear.
 
 ### History
 
